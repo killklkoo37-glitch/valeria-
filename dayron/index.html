@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Flores Amarillas para Valeria 💛 (De parte de Dayron)</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Three.js & OrbitControls -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
+    <!-- Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background: radial-gradient(circle at center, #2c1a04 0%, #0d0801 100%);
+            color: #fff;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .font-cursive {
+            font-family: 'Dancing Script', cursive;
+        }
+
+        #canvas-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 1;
+        }
+
+        .glass {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 235, 150, 0.25);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        .text-glow {
+            text-shadow: 0 0 15px rgba(255, 215, 0, 0.6), 0 0 30px rgba(255, 180, 0, 0.4);
+        }
+
+        .btn-glow {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+        }
+        .btn-glow:active {
+            transform: scale(0.95);
+        }
+
+        .audio-wave span {
+            display: inline-block;
+            width: 3px;
+            height: 12px;
+            background-color: #facc15;
+            margin: 0 1px;
+            border-radius: 3px;
+            animation: wave 1.2s ease-in-out infinite;
+        }
+        .audio-wave.paused span {
+            animation-play-state: paused;
+            height: 4px;
+        }
+        .audio-wave span:nth-child(2) { animation-delay: 0.2s; }
+        .audio-wave span:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes wave {
+            0%, 100% { height: 4px; }
+            50% { height: 16px; }
+        }
+
+        iframe#yt-player {
+            position: absolute;
+            top: -9999px;
+            left: -9999px;
+            width: 1px;
+            height: 1px;
+            opacity: 0;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body class="relative min-h-screen overflow-hidden flex flex-col justify-between">
+
+    <!-- Canvas para el escenario 3D -->
+    <div id="canvas-container"></div>
+
+    <!-- Reproductor de Audio / YouTube Oculto -->
+    <iframe 
+        id="yt-player"
+        src="https://www.youtube.com/embed/6iAn35uM8aU?enablejsapi=1&autoplay=1&loop=1&playlist=6iAn35uM8aU&playsinline=1" 
+        allow="autoplay; encrypted-media">
+    </iframe>
+
+    <!-- Pantalla Inicial para Activar Audio en Celulares -->
+    <div id="start-overlay" class="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md transition-opacity duration-700 cursor-pointer">
+        <div class="text-center p-8 glass rounded-3xl max-w-sm mx-4 transform transition-all border border-yellow-400/40 shadow-2xl">
+            <div class="w-20 h-20 mx-auto mb-4 bg-yellow-400/20 rounded-full flex items-center justify-center animate-bounce border border-yellow-400/50">
+                <i data-lucide="flower-2" class="w-10 h-10 text-yellow-300"></i>
+            </div>
+            <h2 class="text-3xl font-extrabold text-yellow-300 font-cursive text-glow mb-1">Para Valeria ✨</h2>
+            <p class="text-yellow-200/90 text-sm font-medium mb-4">De parte de Dayron</p>
+            <p class="text-yellow-100/70 mb-6 text-xs leading-relaxed">Toca la pantalla para abrir tu sorpresa y escuchar la canción.</p>
+            <button class="w-full py-3.5 bg-gradient-to-r from-yellow-400 to-amber-500 text-slate-950 font-extrabold rounded-full shadow-lg hover:from-yellow-300 hover:to-amber-400 transition-all duration-300 flex items-center justify-center gap-2">
+                <i data-lucide="heart" class="w-5 h-5 fill-current"></i> Abrir Sorpresa
+            </button>
+        </div>
+    </div>
+
+    <!-- Encabezado / Barra Superior -->
+    <header class="relative z-10 w-full p-4 md:p-6 flex justify-between items-center max-w-7xl mx-auto">
+        <div class="flex items-center gap-2 glass px-4 py-2 rounded-full border border-yellow-400/30">
+            <i data-lucide="sun" class="w-4 h-4 text-yellow-400 animate-spin" style="animation-duration: 10s;"></i>
+            <span class="text-xs font-bold tracking-wider text-yellow-200 uppercase">Dayron & Valeria 💛</span>
+        </div>
+
+        <div class="flex gap-2">
+            <!-- Botón Control de Música -->
+            <button id="music-toggle" class="glass btn-glow px-4 py-2 rounded-full flex items-center gap-2 text-yellow-300 font-medium text-xs md:text-sm border border-yellow-400/40">
+                <div id="wave-icon" class="audio-wave paused flex items-center">
+                    <span></span><span></span><span></span>
+                </div>
+                <span id="music-text">Música</span>
+            </button>
+
+            <!-- Botón Ver Video -->
+            <button id="video-btn" class="glass btn-glow p-2 rounded-full text-yellow-300 border border-yellow-400/40" title="Ver Video Oficial">
+                <i data-lucide="tv" class="w-5 h-5"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- Contenido Central / Dedicatoria -->
+    <main class="relative z-10 text-center px-4 my-auto pointer-events-none">
+        <div class="inline-block glass p-6 md:p-8 rounded-3xl border border-yellow-400/30 max-w-xl mx-auto pointer-events-auto transform transition-transform">
+            <span class="inline-block text-xs font-semibold tracking-widest text-yellow-400 uppercase mb-2 px-3 py-1 bg-yellow-400/10 rounded-full border border-yellow-400/30">
+                21 de Marzo • Flores Amarillas
+            </span>
+            <h1 class="text-3xl md:text-5xl font-extrabold text-yellow-300 font-cursive text-glow mb-2 leading-tight">
+                ¡Feliz Día de las Flores Amarillas, Valeria! 💛
+            </h1>
+            <p class="text-yellow-200 font-semibold text-base md:text-lg mb-3">
+                — De parte de Dayron —
+            </p>
+            <p class="text-yellow-100/80 text-xs md:text-sm font-light max-w-md mx-auto leading-relaxed">
+                "Ella sabía que él sabía que algún día pasaría..." ✨<br>
+                Un ramo que nunca se marchita para ti.
+            </p>
+        </div>
+    </main>
+
+    <!-- Pie de Página -->
+    <footer class="relative z-10 w-full p-4 text-center text-xs text-yellow-200/70 pointer-events-none">
+        <div class="glass inline-block px-4 py-2 rounded-full pointer-events-auto border border-yellow-400/20">
+            <p class="flex items-center gap-2 justify-center text-[11px] md:text-xs">
+                <i data-lucide="move-3d" class="w-4 h-4 text-yellow-400"></i>
+                Desliza para girar el ramo en 360° | Toca para soltar más flores
+            </p>
+        </div>
+    </footer>
+
+    <!-- Ventana Modal para Ver el Video -->
+    <div id="video-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md hidden transition-opacity duration-300">
+        <div class="relative w-full max-w-3xl mx-4 glass rounded-2xl overflow-hidden border border-yellow-400/40">
+            <div class="flex justify-between items-center p-4 border-b border-yellow-400/20">
+                <h3 class="font-bold text-yellow-300 flex items-center gap-2 text-sm md:text-base">
+                    <i data-lucide="music" class="w-4 h-4"></i> Floricienta - Flores Amarillas
+                </h3>
+                <button id="close-video" class="p-1 rounded-lg text-yellow-200/80 hover:text-yellow-300">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+            <div class="relative aspect-video w-full">
+                <iframe id="modal-yt-iframe" class="w-full h-full" src="" title="Floricienta" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script de Lógica e Interactividad -->
+    <script>
+        lucide.createIcons();
+
+        // CONTROL DE REPRODUCTOR DE MÚSICA
+        let isPlaying = false;
+        const ytPlayer = document.getElementById('yt-player');
+        const overlay = document.getElementById('start-overlay');
+        const musicBtn = document.getElementById('music-toggle');
+        const waveIcon = document.getElementById('wave-icon');
+        const musicText = document.getElementById('music-text');
+        
+        const videoBtn = document.getElementById('video-btn');
+        const videoModal = document.getElementById('video-modal');
+        const closeVideo = document.getElementById('close-video');
+        const modalYtIframe = document.getElementById('modal-yt-iframe');
+
+        function sendYTCommand(command) {
+            ytPlayer.contentWindow.postMessage(JSON.stringify({
+                'event': 'command',
+                'func': command,
+                'args': []
+            }), '*');
+        }
+
+        function playMusic() {
+            isPlaying = true;
+            sendYTCommand('playVideo');
+            waveIcon.classList.remove('paused');
+            musicText.textContent = 'Sonando';
+        }
+
+        function pauseMusic() {
+            isPlaying = false;
+            sendYTCommand('pauseVideo');
+            waveIcon.classList.add('paused');
+            musicText.textContent = 'Música';
+        }
+
+        function toggleMusic() {
+            if (isPlaying) pauseMusic();
+            else playMusic();
+        }
+
+        overlay.addEventListener('click', () => {
+            overlay.classList.add('opacity-0');
+            setTimeout(() => overlay.remove(), 700);
+            playMusic();
+            triggerConfetti();
+        });
+
+        musicBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            toggleMusic();
+        });
+
+        videoBtn.addEventListener('click', () => {
+            pauseMusic();
+            modalYtIframe.src = "https://www.youtube.com/embed/6iAn35uM8aU?autoplay=1";
+            videoModal.classList.remove('hidden');
+        });
+
+        closeVideo.addEventListener('click', () => {
+            modalYtIframe.src = "";
+            videoModal.classList.add('hidden');
+            playMusic();
+        });
+
+        function triggerConfetti() {
+            confetti({
+                particleCount: 70,
+                spread: 60,
+                origin: { y: 0.6 },
+                colors: ['#facc15', '#eab308', '#fef08a', '#ffffff']
+            });
+        }
+
+        // THREE.JS ESCENARIO 3D DEL RAMO
+        const container = document.getElementById('canvas-container');
+        const scene = new THREE.Scene();
+        scene.fog = new THREE.FogExp2(0x1a0f02, 0.05);
+
+        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(0, 0, 9);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        container.appendChild(renderer.domElement);
+
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+        controls.enableZoom = false;
+        controls.autoRotate = true;
+        controls.autoRotateSpeed = 2.5;
+
+        // Luces
+        const ambientLight = new THREE.AmbientLight(0xfff5cc, 0.9);
+        scene.add(ambientLight);
+
+        const dirLight = new THREE.DirectionalLight(0xfffae6, 1.5);
+        dirLight.position.set(5, 10, 7);
+        scene.add(dirLight);
+
+        // Ramo de Flores
+        const bouquetGroup = new THREE.Group();
+        scene.add(bouquetGroup);
+
+        const yellowPetalMat = new THREE.MeshStandardMaterial({
+            color: 0xffd700,
+            roughness: 0.3,
+            side: THREE.DoubleSide
+        });
+
+        const orangeCenterMat = new THREE.MeshStandardMaterial({
+            color: 0x8b4513,
+            roughness: 0.8
+        });
+
+        const stemMat = new THREE.MeshStandardMaterial({
+            color: 0x2d5a27,
+            roughness: 0.5
+        });
+
+        const leafMat = new THREE.MeshStandardMaterial({
+            color: 0x3a7d34,
+            roughness: 0.4,
+            side: THREE.DoubleSide
+        });
+
+        function createSunflower() {
+            const flower = new THREE.Group();
+
+            const center = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.35, 0.35, 0.08, 24),
+                orangeCenterMat
+            );
+            center.rotation.x = Math.PI / 2;
+            flower.add(center);
+
+            const petalCount = 18;
+            const petalShape = new THREE.Shape();
+            petalShape.moveTo(0, 0);
+            petalShape.quadraticCurveTo(0.12, 0.4, 0.0, 0.9);
+            petalShape.quadraticCurveTo(-0.12, 0.4, 0, 0);
+
+            const petalGeo = new THREE.ShapeGeometry(petalShape);
+
+            for (let i = 0; i < petalCount; i++) {
+                const angle = (i / petalCount) * Math.PI * 2;
+                const petal = new THREE.Mesh(petalGeo, yellowPetalMat);
+                petal.position.x = Math.cos(angle) * 0.32;
+                petal.position.y = Math.sin(angle) * 0.32;
+                petal.rotation.z = angle - Math.PI / 2;
+                flower.add(petal);
+            }
+
+            return flower;
+        }
+
+        const flowerPositions = [
+            { pos: [0, 0.6, 0.2], rot: [0, 0, 0] },
+            { pos: [-0.5, 0.3, 0.1], rot: [0.2, -0.3, 0.2] },
+            { pos: [0.5, 0.3, 0.1], rot: [0.2, 0.3, -0.2] },
+            { pos: [-0.3, -0.1, 0.3], rot: [0.3, -0.2, 0.1] },
+            { pos: [0.3, -0.1, 0.3], rot: [0.3, 0.2, -0.1] },
+            { pos: [0, -0.2, 0.4], rot: [0.4, 0, 0] }
+        ];
+
+        flowerPositions.forEach(data => {
+            const flower = createSunflower();
+            flower.position.set(...data.pos);
+            flower.rotation.set(...data.rot);
+            bouquetGroup.add(flower);
+
+            const stemCurve = new THREE.LineCurve3(
+                new THREE.Vector3(...data.pos),
+                new THREE.Vector3(0, -1.8, 0)
+            );
+            const stem = new THREE.Mesh(
+                new THREE.TubeGeometry(stemCurve, 10, 0.04, 8, false),
+                stemMat
+            );
+            bouquetGroup.add(stem);
+        });
+
+        bouquetGroup.position.y = -0.2;
+
+        // Lluvia de Pétalos
+        const particleCount = 80;
+        const particleGeo = new THREE.PlaneGeometry(0.12, 0.18);
+        const particles = [];
+
+        for (let i = 0; i < particleCount; i++) {
+            const particle = new THREE.Mesh(particleGeo, yellowPetalMat);
+            particle.position.set(
+                (Math.random() - 0.5) * 10,
+                Math.random() * 10 - 5,
+                (Math.random() - 0.5) * 8
+            );
+            particle.userData = {
+                speedY: 0.01 + Math.random() * 0.02,
+                speedRot: (Math.random() - 0.5) * 0.03
+            };
+            scene.add(particle);
+            particles.push(particle);
+        }
+
+        // Interacción al tocar pantalla
+        window.addEventListener('pointerdown', (e) => {
+            if (e.target.closest('button') || e.target.closest('#video-modal')) return;
+            triggerConfetti();
+        });
+
+        // Loop de Animación
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+
+            particles.forEach(p => {
+                p.position.y -= p.userData.speedY;
+                p.rotation.x += p.userData.speedRot;
+                p.rotation.y += p.userData.speedRot;
+
+                if (p.position.y < -5) {
+                    p.position.y = 5;
+                    p.position.x = (Math.random() - 0.5) * 10;
+                }
+            });
+
+            bouquetGroup.position.y = -0.2 + Math.sin(Date.now() * 0.0015) * 0.08;
+            renderer.render(scene, camera);
+        }
+
+        animate();
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+</html>
